@@ -124,6 +124,7 @@ public class HistoryCleanUpTask implements JobExecutor {
             final List<String> stateList)
     throws PersistenceException {
         final Resource baseResource = resolver.getResource(basePath);
+        Calendar resourceDate = Calendar.getInstance();
         // sanity check - should never be null
         if ( baseResource != null ) {
             final Iterator<Resource> topicIter = baseResource.listChildren();
@@ -179,7 +180,11 @@ public class HistoryCleanUpTask implements JobExecutor {
                                     // check if we can delete the minute
                                     final int minute = Integer.valueOf(minuteResource.getName());
                                     final boolean oldMinute = oldHour || minute <= removeDate.get(Calendar.MINUTE);
-                                    if ( oldMinute ) {
+
+                                    // set date
+                                    resourceDate.set(year, month - 1, day, hour, minute, 0);
+
+                                    if (resourceDate.before(removeDate)) {
                                         final Iterator<Resource> jobIter = minuteResource.listChildren();
                                         while ( !context.isStopped() && jobIter.hasNext() ) {
                                             final Resource jobResource = jobIter.next();
